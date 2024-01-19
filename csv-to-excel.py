@@ -10,12 +10,30 @@ def convert_csv_to_excel(csv_file, excel_file):
     excel_file: La ruta del archivo Excel de salida.
   """
 
-  df = pd.read_csv(csv_file)
+  # Prueba con UTF-8 primero.
+  try:
+    df = pd.read_csv(csv_file, encoding='utf-8')
+  except UnicodeDecodeError:
+    # Si falla, prueba con ISO-8859-1.
+    try:
+      df = pd.read_csv(csv_file, encoding='iso-8859-1')
+    except UnicodeDecodeError:
+      # Si aún falla, prueba con CP1252.
+      try:
+        df = pd.read_csv(csv_file, encoding='cp1252')
+      except UnicodeDecodeError:
+        # Si aún falla, imprime un error.
+        print(f"Error al leer el archivo {csv_file}. Revisa la codificación.")
+        return
 
   # Rellenar los valores None con una cadena vacía.
   df["Risk"] = df["Risk"].fillna("")
 
+  # Escribir el archivo Excel.
   df.to_excel(excel_file, index=False)
+
+  # Imprimir una confirmación.
+  print(f"El archivo {csv_file} se convirtió a Excel correctamente.")
 
 def main():
   """
